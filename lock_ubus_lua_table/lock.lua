@@ -6,6 +6,7 @@ local lock = {
         [NOT_OWNER] = "not owner!",
         ["else"] = "ok",
     },
+    NOT_OWNER = NOT_OWNER,
 }
 
 function lock.get_text_response(status)
@@ -34,10 +35,11 @@ function lock.is_owner(module_name)
 end
 
 function lock.unlock(module_name)
-    print("Unlock request")
-    print("Current owner: " .. lock.owner)
-    print("Request from: " .. module_name)
-    if not lock.is_owner(module_name) then return NOT_OWNER end
+    print("[lock.lua] unlock request from " .. module_name .. " (current lock owner: " .. lock.owner .. ")")
+    if not lock.is_owner(module_name) then
+        print("[lock.lua] module is not the owner!")
+        return NOT_OWNER
+    end
     lock.owner = ""
     print("[lock.lua] shared module is unlocked!")
     io.flush()

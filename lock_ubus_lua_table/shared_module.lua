@@ -10,7 +10,7 @@ local conn = ubus.connect()
 if not conn then print("[shared_module.lua] ubus connect error") end
 
 local function print_text(module_name, text)
-    if not lock.is_owner_or_unlocked(module_name) then return lock.response.NOT_OWNER end
+    if not lock.is_owner_or_unlocked(module_name) then return lock.NOT_OWNER end
 
     print("[shared_module.lua] text from UBUS: " .. text)
     io.flush()
@@ -25,7 +25,6 @@ function app.ubus_init()
                     local text = msg["text"] or ""
 
                     local result = print_text(module_name, text)
-
                     local response = {result = lock.get_text_response(result)}
                     conn:reply(req, response)
                 end, { module_name = ubus.STRING, text = ubus.STRING }
