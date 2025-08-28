@@ -15,20 +15,30 @@ function lock.do_lock(module_name)
         l_len = 0,
     }
 
-    if M.fcntl(fd, M.F_SETLKW, lock_) == -1 then
-        print("[" .. os.date("%X") .. "] "..tostring(module_name) .. ": Error when do lock")
-        io.flush()
-        unistd.close(fd)
+    if M.fcntl(fd, M.F_GETLK, lock_) == -1 then
+        return false, nil
+    end
 
+    if lock_.l_type ~= M.F_UNLCK then
+        -- print("File locked!")
         return false, nil
     else
-        print("[" .. os.date("%X") .. "] "..tostring(module_name) .. ": Lock started")
-        io.flush()
-        unistd.ftruncate(fd, 0)
-        unistd.write(fd, module_name)
-        unistd.fsync(fd)
+        lock_.l_type = M.F_WRLCK
+        if M.fcntl(fd, M.F_SETLKW, lock_) == -1 then
+            print("[" .. os.date("%X") .. "] "..tostring(module_name) .. ": Error when do lock")
+            io.flush()
+            unistd.close(fd)
 
-        return true, fd
+            return false, nil
+        else
+            print("[" .. os.date("%X") .. "] "..tostring(module_name) .. ": Lock started")
+            io.flush()
+            unistd.ftruncate(fd, 0)
+            unistd.write(fd, module_name)
+            unistd.fsync(fd)
+
+            return true, fd
+        end
     end
 end
 
